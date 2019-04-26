@@ -1,9 +1,8 @@
 import nltk
+from examples import *
 
-examples = [
-    "natural language sentence",
-    "I am a natural language sentence"
-]
+from textblob.classifiers import NaiveBayesClassifier
+
 
 
 def download_nltk_models():
@@ -20,7 +19,10 @@ def turing(sentence):
 
 def main():
     # download_nltk_models()
-    run_turing(examples)
+    print("Negatives:")
+    run_turing(examples_negatives)
+    print("\n\n\nPositives:")
+    run_turing(examples_positives)
 
 
 # region Helpers
