@@ -1,27 +1,41 @@
 import nltk
-from examples import *
+from data import *
 
 from textblob.classifiers import NaiveBayesClassifier
+
 
 def download_nltk_models():
     nltk.download("punkt")
     nltk.download("averaged_perceptron_tagger")
 
 
+def get_training_data():
+    tuples = []
+    for example in train_positives:
+        # tokens = nltk.word_tokenize(example) TODO Use instead of raw sentnece
+        tuples.append((example, True))
+    for example in train_negatives:
+        tuples.append((example, False))
+    return tuples
+
+
+def train_classifier():
+    return NaiveBayesClassifier(get_training_data())
+
+
 def turing_classify(sentence):
-    tokens = nltk.word_tokenize(sentence)
-    pos_tags = nltk.pos_tag(tokens)
-    # print("POS: ", pos_tags)
-    score = len(sentence) / 100
-    return score >= 0.25
+    classifier = train_classifier()
+    classify = classifier.classify(sentence)
+    print("Classifier(%s) -> %s" % (sentence, classify))
+    return classify
 
 
 def main():
     # download_nltk_models()
     print("Negatives:")
-    run_turing(examples_negatives, False)
+    run_turing(test_negatives, False)
     print("\n\n\nPositives:")
-    run_turing(examples_positives, True)
+    run_turing(test_positives, True)
 
 
 # region Helpers
