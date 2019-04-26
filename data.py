@@ -97,9 +97,11 @@ positives = [
     "What are clouds made of",
     "What are the best shoes to go running",
     "How is the stock market today",
-    "is Paul Louis Nech the richest man in the world"]
+    "is Paul Louis Nech the richest man in the world"
+]
+
 negatives = [
-    "    Red wedding shoes ",
+    "Red wedding shoes",
     "Action movie",
     "Vegas tonight",
     "IPhone 32gb",
@@ -197,4 +199,5 @@ negatives = [
     "running shoes best",
     "stock market today",
     "world richest man Paul louis Nech",
+    "Happy shoes near me",
 ]

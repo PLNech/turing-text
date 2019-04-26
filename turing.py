@@ -1,5 +1,5 @@
 import random
-
+import pickle
 import nltk
 from data import *
 
@@ -22,6 +22,8 @@ def train_and_test():
 
     accuracy = run_turing(classifier, [data for (data, label) in test_positives], True)
     print("Accuracy for positive examples: %s" % accuracy)
+
+    save_classifier(classifier)
 
 
 def build_datasets():
@@ -64,6 +66,19 @@ def print_results(result_pairs):
         print("%s -> %s" % (example, result))
 
 
+def save_classifier(classifier):
+    f = open('classifier.pickle', 'wb')
+    pickle.dump(classifier, f)
+    f.close()
+
+
+def load_classifier():
+    f = open('classifier.pickle', 'rb')
+    classifier = pickle.load(f)
+    f.close()
+    return classifier
+
+
 # region Helpers
 def main():
     train_and_test()
@@ -72,16 +87,22 @@ def main():
 def run_turing(classifier, collection, expected):
     result_pairs = []
     for input in collection:
-        result_pairs.append((input, turing_classify(classifier, input)))
+        result_pairs.append((input, turing_classify_pos(classifier, input)))
     # print_results(result_pairs)
     accuracy = sum([1 for (item, output) in result_pairs if output is expected]) / len(result_pairs)
     return accuracy
 
 
+def turing_classify_pos(classifier, sentence):
+    classify = classifier.prob_classify(sentence)
+    prediction = classify.max()
+    probability = classify.prob(prediction)
+    debug("Classifier(%s) -> %s (%s)" % (sentence, prediction, probability))
+    return prediction, probability
+
+
 def turing_classify(classifier, sentence):
-    classify = classifier.classify(sentence)
-    debug("Classifier(%s) -> %s" % (sentence, classify))
-    return classify
+    return turing_classify_pos(classifier, get_pos_tags(sentence))
 
 
 def partition(list_in, n):

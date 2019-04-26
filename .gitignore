@@ -109,3 +109,4 @@ venv.bak/
 
 # Generated models
 server/models
+*.pickle
