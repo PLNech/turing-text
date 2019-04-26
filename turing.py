@@ -12,11 +12,18 @@ def download_nltk_models():
 def get_training_data():
     tuples = []
     for example in train_positives:
-        # tokens = nltk.word_tokenize(example) TODO Use instead of raw sentnece
-        tuples.append((example, True))
+        # print(tags)
+        tuples.append(((get_pos_tags(example)), True))
     for example in train_negatives:
-        tuples.append((example, False))
+        tuples.append(((get_pos_tags(example)), False))
     return tuples
+
+
+def get_pos_tags(example):
+    tokens = nltk.word_tokenize(example)
+    pos_tags = nltk.pos_tag(tokens)
+    tags = [v for (k, v) in pos_tags]
+    return tags
 
 
 def train_classifier():
@@ -47,7 +54,7 @@ def print_results(result_pairs):
 def run_turing(collection, expected):
     result_pairs = []
     for item in collection:
-        result_pairs.append((item, turing_classify(item)))
+        result_pairs.append((item, turing_classify(get_pos_tags(item))))
     # print_results(result_pairs)
     accuracy = sum([1 for (item, output) in result_pairs if output is expected]) / len(result_pairs)
     print("Accuracy: %s" % accuracy)
