@@ -86,11 +86,12 @@ def main():
 
 def run_turing(classifier, collection, expected):
     result_pairs = []
-    for input in collection:
-        result_pairs.append((input, turing_classify_pos(classifier, input)))
-    # print_results(result_pairs)
-    accuracy = sum([1 for (item, output) in result_pairs if output is expected]) / len(result_pairs)
-    return accuracy
+    for sentence in collection:
+        (prediction, probability) = turing_classify_pos(classifier, sentence)
+        result_pairs.append((sentence, prediction, probability))
+    debug("example result:", result_pairs[0])
+    print("Average probability: " ) # TODO Compute avg proba
+    return sum([1 for (item, prediction, probability) in result_pairs if prediction is expected]) / len(result_pairs)
 
 
 def turing_classify_pos(classifier, sentence):
