@@ -1,11 +1,50 @@
 import random
 import pickle
 import nltk
-from data import *
+from data import positives as data_positives
+from data import negatives as data_negatives
+from data_classics import positives as classics_positives
+from data_classics import negatives as classics_negatives
 
 from textblob.classifiers import NaiveBayesClassifier
 
-DEBUG = False
+DEBUG = True
+USE_CLASSICS = True
+
+
+def name_feature(is_positive):
+    if is_positive:
+        return "Shakespeare" if USE_CLASSICS else "positive"
+    else:
+        return "Hobbes" if USE_CLASSICS else "negative"
+
+
+def build_datasets():
+    positives = classics_positives if USE_CLASSICS else data_positives
+    negatives = classics_negatives if USE_CLASSICS else data_negatives
+    random.shuffle(positives)
+    random.shuffle(negatives)
+    min_size = min(len(positives), len(negatives))
+    debug("Dataset size: len(pos)=%s, len(neg)=%s -> %s" % ((len(positives)), (len(negatives)), min_size))
+
+    positives_pos = [get_pos_tags(it) for it in positives[0:min_size]]
+    negatives_pos = [get_pos_tags(it) for it in negatives[0:min_size]]
+
+    example_positive = "Example " + name_feature(True) + " data: %s -> %s"
+    example_negative = "Example " + name_feature(False) + " data: %s -> %s"
+    print(example_positive % (positives[0], positives_pos[0]))
+    print(example_negative % (negatives[0], negatives_pos[0]))
+
+    part_pos = partition(positives_pos, 5)
+    part_neg = partition(negatives_pos, 5)
+
+    train_positives = make_tuples(part_pos[0] + part_pos[1] + part_pos[2] + part_pos[3], True) # TODO: LIST COMPrehension
+    train_negatives = make_tuples(part_neg[0] + part_neg[1] + part_neg[2] + part_neg[3], False)
+    test_positives = make_tuples(part_pos[4], True)
+    test_negatives = make_tuples(part_neg[4], False)
+    debug("Generated data!\nTrain+:%s\nTrain-:%s\nTest+:%s\nTest-:%s\n" % (
+        train_positives, train_negatives, test_positives, test_negatives))
+    return train_positives, train_negatives, test_positives, test_negatives
 
 
 def train_and_test():
@@ -18,31 +57,13 @@ def train_and_test():
     classifier = train_classifier(training_data)
 
     accuracy = run_turing(classifier, [data for (data, label) in test_negatives], False)
-    print("Accuracy for negative examples: %s" % accuracy)
+    print("Accuracy for " + name_feature(False) + " examples: %s" % accuracy)
 
     accuracy = run_turing(classifier, [data for (data, label) in test_positives], True)
-    print("Accuracy for positive examples: %s" % accuracy)
+    print("Accuracy for " + name_feature(False) + " examples: %s" % accuracy)
 
     print("Classifier features:", classifier.show_informative_features(5))
     save_classifier(classifier)
-
-
-def build_datasets():
-    random.shuffle(positives)
-    random.shuffle(negatives)
-    positives_pos = [get_pos_tags(it) for it in positives]
-    negatives_pos = [get_pos_tags(it) for it in negatives]
-    debug("Example data generated: %s -> %s" % (positives[0], positives_pos[0]))
-    part_pos = partition(positives_pos, 5)
-    part_neg = partition(negatives_pos, 5)
-
-    train_positives = make_tuples(part_pos[0] + part_pos[1] + part_pos[2] + part_pos[3], True) # TODO: LIST COMPrehension
-    train_negatives = make_tuples(part_neg[0] + part_neg[1] + part_neg[2] + part_neg[3], False)
-    test_positives = make_tuples(part_pos[4], True)
-    test_negatives = make_tuples(part_neg[4], False)
-    debug("Generated data!\nTrain+:%s\nTrain-:%s\nTest+:%s\nTest-:%s\n" % (
-        train_positives, train_negatives, test_positives, test_negatives))
-    return train_positives, train_negatives, test_positives, test_negatives
 
 
 def make_tuples(data, value):
@@ -70,15 +91,17 @@ def print_results(result_pairs):
 
 def save_classifier(classifier):
     f = open('classifier.pickle', 'wb')
+    pickle.dump(USE_CLASSICS, f)
     pickle.dump(classifier, f)
     f.close()
 
 
 def load_classifier():
     f = open('classifier.pickle', 'rb')
+    used_classics = pickle.load(f)
     classifier = pickle.load(f)
     f.close()
-    return classifier
+    return classifier, used_classics
 
 
 # region Helpers

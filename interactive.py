@@ -7,14 +7,33 @@ easter_eggs = {
     "Bite my shiny metal ass": "Bender"
 }
 
+prompts_turing = {
+    "title": "NATURAL LANGUAGE DETECTOR",
+    "challenge": "So you pretend you're a human? Type a query you would search on an e-commerce website:",
+    "exit": "See you later meatbag!",
+    "success": "You're a human! 🙋",
+    "failure": "You sound like a robot 🤖",
+    "nothing": "You did not enter anything. Definitely robot.",
+}
+
+prompts_classics = {
+    "title": "Author detector",
+    "challenge": "Let's see if you sound more like Shakespeare than Hobbes:",
+    "exit": "Thou know'st 'tis common; all that lives must die,\nPassing through nature to eternity.",
+    "success": "Sounds Shakespearian. 🎩",
+    "failure": "Did you read too much Hobbes? 🤓",
+    "nothing": "Analphabet.",
+}
+
 if __name__ == "__main__":
-    classifier = load_classifier()
-    print("\n\nNATURAL LANGUAGE DETECTOR\n")
+    classifier, used_classics = load_classifier()
+    prompts = prompts_classics if used_classics else prompts_turing
+    print("\n\n" + prompts["title"] + "\n")
 
 while True:
-    word = input("\nSo you pretend you're a human? Type a query you would search on an ecommerce website:\n")
+    word = input("\n" + prompts["challenge"] + "\n")
     if word == "/exit":
-        print("See you later meatbag!")
+        print(prompts["exit"])
         break
     elif word in easter_eggs:
         print("You sound like %s. Definitely a robot." % easter_eggs[word])
@@ -23,5 +42,5 @@ while True:
         print("You did not enter anything. Definitely robot.")
     is_human, proba = turing_classify(classifier, word)
     proba_string = " ({0:.0%} sure)".format(proba) if SHOW_PROBA else ""
-    print(("You're a human! 🙋" if is_human else "You sound like a robot 🤖") + proba_string)
+    print((prompts["success" if is_human else "failure"]) + proba_string)
     continue
