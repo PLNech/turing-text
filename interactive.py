@@ -9,8 +9,10 @@ easter_eggs = {
 
 if __name__ == "__main__":
     classifier = load_classifier()
+    print("\n\nNATURAL LANGUAGE DETECTOR\n")
+
 while True:
-    word = input("So you pretend you're a human? Type a sentence to prove it! (or /exit to quit)\n")
+    word = input("\nSo you pretend you're a human? Type a query you would search on an ecommerce website:\n")
     if word == "/exit":
         print("See you later meatbag!")
         break
@@ -21,5 +23,5 @@ while True:
         print("You did not enter anything. Definitely robot.")
     is_human, proba = turing_classify(classifier, word)
     proba_string = " ({0:.0%} sure)".format(proba) if SHOW_PROBA else ""
-    print(("You're a human!" if is_human else "YO FELLOW ROBOT") + proba_string)
+    print(("You're a human! 🙋" if is_human else "You sound like a robot 🤖") + proba_string)
     continue
