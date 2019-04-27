@@ -9,7 +9,7 @@ DEBUG = False
 
 
 def train_and_test():
-    # download_nltk_models()
+    download_nltk_models()
     train_positives, train_negatives, test_positives, test_negatives = build_datasets()
     training_data = train_positives + train_negatives
     random.shuffle(training_data)
@@ -23,6 +23,7 @@ def train_and_test():
     accuracy = run_turing(classifier, [data for (data, label) in test_positives], True)
     print("Accuracy for positive examples: %s" % accuracy)
 
+    print("Classifier features:", classifier.show_informative_features(5))
     save_classifier(classifier)
 
 
@@ -31,10 +32,11 @@ def build_datasets():
     random.shuffle(negatives)
     positives_pos = [get_pos_tags(it) for it in positives]
     negatives_pos = [get_pos_tags(it) for it in negatives]
+    debug("Example data generated: %s -> %s" % (positives[0], positives_pos[0]))
     part_pos = partition(positives_pos, 5)
     part_neg = partition(negatives_pos, 5)
 
-    train_positives = make_tuples(part_pos[0] + part_pos[1] + part_pos[2] + part_pos[3], True)
+    train_positives = make_tuples(part_pos[0] + part_pos[1] + part_pos[2] + part_pos[3], True) # TODO: LIST COMPrehension
     train_negatives = make_tuples(part_neg[0] + part_neg[1] + part_neg[2] + part_neg[3], False)
     test_positives = make_tuples(part_pos[4], True)
     test_negatives = make_tuples(part_neg[4], False)
@@ -86,11 +88,14 @@ def main():
 
 def run_turing(classifier, collection, expected):
     result_pairs = []
+    avg_proba = 0
     for sentence in collection:
         (prediction, probability) = turing_classify_pos(classifier, sentence)
+        avg_proba += probability
         result_pairs.append((sentence, prediction, probability))
+    avg_proba /= len(collection)
     debug("example result:", result_pairs[0])
-    print("Average probability: " ) # TODO Compute avg proba
+    print("Average probability: %s" % avg_proba)
     return sum([1 for (item, prediction, probability) in result_pairs if prediction is expected]) / len(result_pairs)
 
 
